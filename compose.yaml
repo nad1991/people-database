@@ -1,0 +1,47 @@
+name: people
+
+services: # define services (containers) to run
+  app: # name the service, usually app or web for the main one by general convention, but it can be named anything
+    depends_on: # set dependencies to be loaded before this one, usually db or an api, using service name
+     - db
+    tty: true
+    build: ./app # path to the Dockerfile to be used for building
+    container_name: people-app
+    # ports: # ports to expose, the first reffering to the host and the second one to the container
+    #   - 8000:8000
+    environment: # set environment variables for the container
+      
+      COMPOSE_PROJECT_NAME: hello
+      # PATH: ${PATH}:/root/.local/bin
+      POETRY_VIRTUALENVS_IN_PROJECT: true
+      # POETRY_HOME: /root/.local/poetry
+
+    develop: # this is for docker compose watch mode https://docs.docker.com/compose/file-watch/
+      watch: # specify the path to monitor and the action to take (rebuild, sync)
+        - path: ./app/people.py
+          target: /app/people.py # you can use target to adapt to the path inside the container
+          action: sync
+        - path: ./app/people_init.py
+          target: /app/people_init.py # you can use target to adapt to the path inside the container
+          action: sync
+  
+    # volumes:
+    #   - ./app:/app
+
+  db:
+    image: postgres:16.2-alpine3.19
+    container_name: people-db
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: DB
+
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/create_tables.sql
+
+volumes:
+  db_data:
+    driver: local
