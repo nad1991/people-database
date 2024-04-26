@@ -1,22 +1,8 @@
 import click
-from sqlalchemy import create_engine, text
+from sql import query_db
 
 
 QUERY = ""
-
-
-def query_db(txt: str):
-    query = text(txt)
-
-    engine = create_engine(  # sqlalchemy connection to postgres database
-        "postgresql+psycopg2://postgres:postgres@db:5432/DB"
-    )  # credentials shouldn't be hardcoded like this, but since it's a test with no real data it's not an issue
-    conn = engine.connect()
-
-    result = conn.execute(query)
-
-    for row in result:
-        print(row)
 
 
 @click.group(chain=True)
@@ -66,18 +52,8 @@ def parse(ctx, result):
         pass
 
     QUERY += ";"
-    click.echo(QUERY)
 
     query_db(QUERY)
-
-
-"""
-    select column
-    limit age (--gt, --greater-than, --eq, --equal, --lt, --less-than)
-    limit name, surname, unique
-    sort name, surname, age
-    add rows from cli or files
-"""
 
 
 @click.command()
@@ -193,4 +169,3 @@ cli.add_command(sort)
 
 if __name__ == "__main__":
     cli(obj={})
-    # parse()

@@ -9,38 +9,52 @@ services: # define services (containers) to run
     container_name: people-app
     # ports: # ports to expose, the first reffering to the host and the second one to the container
     #   - 8000:8000
-    environment: # set environment variables for the container
-      
-      COMPOSE_PROJECT_NAME: hello
-      # PATH: ${PATH}:/root/.local/bin
-      POETRY_VIRTUALENVS_IN_PROJECT: true
-      # POETRY_HOME: /root/.local/poetry
+    env_file:
+      - .env.app
+    # environment: # set environment variables for the container
+      # DB_USER: postgres
+        # According to the documentation (https://docs.docker.com/compose/compose-file/09-secrets/)
+        # this should pass the secret file's contents to the variable. Works in the service below but not here...
+      # DB_PASSWORD_FILE: /run/secrets/db_password
+      # POETRY_VIRTUALENVS_IN_PROJECT: true
 
+    secrets:
+      - db_password
+    
     develop: # this is for docker compose watch mode https://docs.docker.com/compose/file-watch/
       watch: # specify the path to monitor and the action to take (rebuild, sync)
         - path: ./app/people.py
           target: /app/people.py # you can use target to adapt to the path inside the container
           action: sync
         - path: ./app/people_init.py
-          target: /app/people_init.py # you can use target to adapt to the path inside the container
+          target: /app/people_init.py
           action: sync
-  
-    # volumes:
-    #   - ./app:/app
+        - path: ./app/sql.py
+          target: /app/sql.py
+          action: sync
+
 
   db:
     image: postgres:16.2-alpine3.19
     container_name: people-db
     ports:
       - 5432:5432
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: DB
+    env_file:
+      - .env.db
+    # environment:
+      # POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+      # POSTGRES_USER: postgres
+      # POSTGRES_DB: DB
 
+    secrets:
+      - db_password
     volumes:
       - ./db_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/create_tables.sql
+
+secrets:
+  db_password:
+    file: ./db_password.txt
 
 volumes:
   db_data:
