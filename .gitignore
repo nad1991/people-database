@@ -1,0 +1,5 @@
+app/.venv
+.pytest_cache
+# .env # uncomment this for envronment variables you don't want to share
+# db_password.txt
+# and of course this one, otherwise it wouldn't be much of a secret

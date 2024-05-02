@@ -8,9 +8,10 @@ RUN pipx install poetry
 WORKDIR /app
 
 COPY ./people.py people_init.py sql.py poetry.lock pyproject.toml ./
-COPY .venv .venv
+# COPY .venv .venv
 
 ENV PATH="/app/.venv/bin:${PATH}:/root/.local/bin"
+ENV POETRY_VIRTUALENVS_IN_PROJECT=true
 
 RUN poetry install
 
